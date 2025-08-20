@@ -23,7 +23,10 @@ const userSchema = new mongoose.Schema({
   // Email reminder preferences
   emailReminders: {
     enabled: { type: Boolean, default: true },
-    reminderDays: [{ type: Number, default: [1, 3, 7] }], // Days before deadline to send reminders
+    reminderDays: {
+      type: [Number],
+      default: [1, 3, 7]
+}, // Days before deadline to send reminders
     dailyDigest: { type: Boolean, default: false }, // Daily summary of tasks
     reminderTime: { type: String, default: '17:30' } // Time of day to send reminders (24hr format)
   }
