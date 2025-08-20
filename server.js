@@ -12,7 +12,7 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = "3.110.27.235"; // IP access
+const HOST = "0.0.0.0"; // allow external access
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {

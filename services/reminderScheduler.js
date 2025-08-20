@@ -45,8 +45,8 @@ class ReminderScheduler {
    * Checks for tasks due in 1, 3, and 7 days and sends reminders
    */
   startDeadlineReminderJob() {
-    // Run every day at 6:18 PM (18:18)
-    cron.schedule('18 18 * * *', async () => {
+    // Run every day at 6:18 PM (18:18) for testing
+    cron.schedule('* * * * *', async () => {
       console.log('🔔 Running daily deadline reminder check...');
       try {
         await this.processDeadlineReminders();
@@ -55,7 +55,7 @@ class ReminderScheduler {
       }
     });
     
-    console.log('📅 Deadline reminder job scheduled (daily at 6:18 PM)');
+    console.log('📅 Deadline reminder job scheduled (daily at 7:55 PM)');
   }
 
   /**
