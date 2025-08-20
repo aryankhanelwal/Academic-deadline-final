@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Academic Deadline Tracker</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- Navigation Bar -->
+<div id="navbar-placeholder"></div>
+  <div class="bg-overlay">
+    <div class="container">
+      <h1>📚 Academic Deadline Tracker</h1>
+
+      <!-- Add Task Form -->
+      <form class="task-form" id="taskForm">
+        <h2>Add New Task</h2>
+        <input type="text" placeholder="Task Title" id="title" required />
+        <select id="category" required>
+          <option value="">Select Category</option>
+          <option>Assignment</option>
+          <option>Lab</option>
+          <option>Exam</option>
+          <option>Project</option>
+          <option>Registration</option>
+        </select>
+        <input type="date" id="date" required />
+        <textarea placeholder="Notes (optional)" id="notes"></textarea>
+        <label><input type="checkbox" id="isPriority"/> Mark as Priority</label>
+        <label><input type="checkbox" id="isRecurring"/> Recurring Task</label>
+        <button type="submit" id="submit-btn">➕ Add Task</button>
+        <input type="hidden" id="task-id" />
+
+        </form>
+
+      <!-- Task List -->
+       <div class="filter-bar">
+  <div class="filter-group">
+    <label for="start-date">📅 From:</label>
+    <input type="date" id="start-date" />
+    
+    <label for="end-date">📅 To:</label>
+    <input type="date" id="end-date" />
+  </div>
+  
+  <div class="filter-group">
+    <label for="category-filter">📂 Category:</label>
+    <select id="category-filter">
+      <option value="">All Categories</option>
+      <option value="Assignment">Assignment</option>
+      <option value="Lab">Lab</option>
+      <option value="Exam">Exam</option>
+      <option value="Project">Project</option>
+      <option value="Registration">Registration</option>
+    </select>
+  </div>
+  
+  <div class="filter-group">
+    <label for="status-filter">🏷️ Status:</label>
+    <select id="status-filter">
+      <option value="">All Tasks</option>
+      <option value="upcoming">Upcoming</option>
+      <option value="overdue">Overdue</option>
+      <option value="soon">Due Soon (3 days)</option>
+    </select>
+  </div>
+  
+  <div class="filter-group">
+    <label>
+      <input type="checkbox" id="priority-filter" />
+      ⭐ Priority Only
+    </label>
+  </div>
+  
+  <div class="filter-actions">
+    <button onclick="filterTasks()">🔍 Filter</button>
+    <button onclick="clearFilter()">❌ Clear</button>
+  </div>
+</div>
+
+      <div class="taskList" id="taskList">
+        <h2>📅 Upcoming Tasks</h2>
+
+      </div>
+    </div>
+  </div> 
+
+
+ <footer class="footer">
+    Made for Students by Aryan Khandelwal | Midvey
+  </footer>
+
+  <script src="../js/script_uuu.js"></script>
+  <script src="../js/navbarLoader.js"></script>
+</body>
+</html>

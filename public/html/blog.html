@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midvey | Academic Insights & Tips</title>
+    <meta name="description" content="Stay informed with the latest academic strategies, study tips, and insights to help you succeed in your educational journey.">
+    <link rel="stylesheet" href="../css/blog.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+</head>
+<body>
+    <!-- Header -->
+      <div class="overlay">
+    <div id="navbar-placeholder"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Academic Insights & Tips</h1>
+                <p class="hero-description">
+                    Stay informed with the latest academic strategies, study tips, and insights to help you succeed in your educational journey.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="blog-layout">
+                <!-- Main Content Area -->
+                <div class="main-column">
+                    <!-- Blog Creation Form -->
+                    <section class="blog-form-section" id="blogFormSection">
+                        <h2 class="section-title">✍️ Create Your Blog Post</h2>
+                        <div class="blog-form-card">
+                            <form class="blog-form" id="blogForm">
+                                <div class="form-group">
+                                    <label for="blogTitle" class="form-label">Blog Title</label>
+                                    <input type="text" id="blogTitle" class="form-input" placeholder="Enter your blog title..." required />
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="blogContent" class="form-label">Blog Content</label>
+                                    <textarea id="blogContent" class="form-textarea" rows="6" placeholder="Write your thoughts here..." required></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="blogCategory" class="form-label">Category</label>
+                                    <select id="blogCategory" class="form-select" required>
+                                        <option value="General">General</option>
+                                        <option value="Study Tips">Study Tips</option>
+                                        <option value="Academic Life">Academic Life</option>
+                                        <option value="Resources">Resources</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="blogImage" class="form-label">Upload Image (Optional)</label>
+                                    <input type="file" id="blogImage" class="form-file" accept="image/*" />
+                                </div>
+                                
+                                <div class="button-group">
+                                    <button type="submit" class="create-btn">🚀 Create Blog</button>
+                                    <button type="button" class="clear-btn" onclick="clearForm()">🗑️ Clear Form</button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+
+                    <!-- Recent Posts -->
+                    <section class="recent-section">
+                        <h2 class="section-title">All Blog Posts</h2>
+                        <div class="posts-container" id="blogPosts">
+                            <!-- Blog entries will appear here -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <!-- Categories -->
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">Categories</h3>
+                        <div class="categories-list">
+                            <div class="category-item">
+                                <span class="category-name">Study Tips</span>
+                                <span class="category-count" id="studyTipsCount">0</span>
+                            </div>
+                            <div class="category-item">
+                                <span class="category-name">Academic Life</span>
+                                <span class="category-count" id="academicLifeCount">0</span>
+                            </div>
+                            <div class="category-item">
+                                <span class="category-name">Resources</span>
+                                <span class="category-count" id="resourcesCount">0</span>
+                            </div>
+                            <div class="category-item">
+                                <span class="category-name">General</span>
+                                <span class="category-count" id="generalCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">Quick Links</h3>
+                        <div class="quick-links">
+                            <a href="home.html" class="quick-link">🏠 Home</a>
+                            <a href="contact.html" class="quick-link">📞 Contact Us</a>
+                            <a href="#blogFormSection" class="quick-link">✍️ Create Post</a>
+                            <a href="#" class="quick-link" onclick="scrollToAllPosts()">📚 All Posts</a>
+                        </div>
+                    </div>
+
+                    <!-- User Info Card -->
+                    <div class="sidebar-card user-info-card" id="userInfoCard">
+                        <h3 class="sidebar-title">User Status</h3>
+                        <div class="user-info-content" id="userInfoContent">
+                            <p class="login-prompt">Please log in to create and manage your blog posts.</p>
+                            <a href="login.html" class="login-link">Login</a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/navbarLoader.js"></script>
+    <script src="../js/blog.js"></script>
+</body>
+</html>

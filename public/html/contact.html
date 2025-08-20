@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us | Midvey</title>
+  <link rel="stylesheet" href="../css/contact.css" />
+</head>
+<body>
+
+  <!-- Navbar (Same as Home) -->
+   <div id="navbar-placeholder"></div>
+
+  <!-- Contact Section -->
+   <div class="bg-overlay">
+  <section class="contact-section">
+    <div class="contact-content">
+      <h1>📬 Contact Us</h1>
+      <p>If you have any questions, suggestions, or feedback, feel free to reach out! We’d love to hear from you.</p>
+
+      <form class="contact-form" method="POST" action="/contact">
+        <input type="text" name="name" placeholder="Your Name" required />
+        <input type="email" name="email" placeholder="Your Email" required />
+        <textarea name="message" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+</div>
+  <!-- Footer -->
+  <footer class="footer">
+    Made for Students by Aryan Khandelwal | Midvey
+  </footer>
+
+    <script>
+  document.querySelector('.contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.querySelector('input[name="name"]').value;
+    const email = document.querySelector('input[name="email"]').value;
+    const message = document.querySelector('textarea[name="message"]').value;
+
+    const res = await fetch('/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, message })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+  });
+</script>
+
+  <script src="../js/navbarLoader.js"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #f4f4f4, #fff);
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  width: 100%;
+  background-color: #fff4e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #5a3e36;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #5a3e36;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: #8b5e3c;
+  text-decoration: underline;
+}
+.signup-section {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: url('https://www.cnu.org/sites/default/files/styles/public_square_feature_image/public/BostonCollege1.jpg?itok=iKc35HST') no-repeat center center/cover;
+  min-height: 100vh;
+}
+
+.signup-box {
+  background: rgba(255,255,255,0.95);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.signup-box h2 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #2c3e50;
+  border-bottom: 2px solid #c28d6f;
+  display: inline-block;
+  padding-bottom: 0.3rem;
+}
+
+.signup-box input, .signup-box select {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+#password-strength {
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.signup-box button {
+  width: 100%;
+  padding: 0.8rem;
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.signup-box button:hover {
+  background: #1e293b;
+}
+
+/* OTP Verification Styles */
+.otp-info {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.otp-info p {
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+.phone-display {
+  font-weight: bold;
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+
+#otp-code {
+  text-align: center;
+  font-size: 1.5rem;
+  letter-spacing: 0.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.otp-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.otp-actions button {
+  flex: 1;
+}
+
+.secondary {
+  background: #6b7280 !important;
+}
+
+.secondary:hover {
+  background: #4b5563 !important;
+}
+
+.back-to-signup {
+  text-align: center;
+}
+
+.link-btn {
+  background: none !important;
+  color: #3b82f6 !important;
+  text-decoration: underline;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+}
+
+.link-btn:hover {
+  color: #1d4ed8 !important;
+}
+
+/* Success Message Styles */
+#success-message {
+  text-align: center;
+}
+
+#success-message h2 {
+  color: #059669;
+  margin-bottom: 1rem;
+}
+
+#success-message p {
+  margin-bottom: 2rem;
+  color: #4a5568;
+  font-size: 1.1rem;
+}
+
+#go-to-dashboard-btn {
+  background: #059669 !important;
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+}
+
+#go-to-dashboard-btn:hover {
+  background: #047857 !important;
+}
+
+input[type=tel]{
+padding-right: 500px;
+padding-left: 36px;
+
+}
+
+
+.footer {
+  text-align: center;
+  padding: 1rem;
+  background: #f8efe6;
+  font-size: 0.9rem;
+  color: #5a3e36;
+}
+
