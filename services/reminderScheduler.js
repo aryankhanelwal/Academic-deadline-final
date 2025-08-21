@@ -55,7 +55,7 @@ class ReminderScheduler {
       }
     });
     
-    console.log('📅 Deadline reminder job scheduled (daily at 7:55 PM)');
+    console.log('📅 Deadline reminder job scheduled (daily after 1 min for testing purpose)');
   }
 
   /**
