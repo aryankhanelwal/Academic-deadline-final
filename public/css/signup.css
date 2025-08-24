@@ -4,98 +4,247 @@
   padding: 0;
   font-family: "Segoe UI", sans-serif;
 }
+
 body {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(to bottom right, #f4f4f4, #fff);
   margin: 0;
   padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Navbar - Mobile-first responsive */
 .navbar {
   width: 100%;
   background-color: #fff4e6;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 1rem;
   position: sticky;
   top: 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  flex-wrap: wrap;
 }
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .navbar {
+    padding: 1rem 2rem;
+  }
+}
+
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
   color: #5a3e36;
+  flex: 1;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .logo {
+    font-size: 1.5rem;
+  }
 }
 
 .nav-links {
   list-style: none;
   display: flex;
   gap: 1.5rem;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-links a {
   text-decoration: none;
   color: #5a3e36;
   font-weight: 500;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+  display: block;
 }
 
 .nav-links a:hover {
   color: #8b5e3c;
   text-decoration: underline;
 }
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #5a3e36;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.mobile-menu-toggle:hover {
+  background-color: rgba(90, 62, 54, 0.1);
+}
+
+/* Mobile Navigation */
+@media (max-width: 767px) {
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 244, 230, 0.98);
+    flex-direction: column;
+    gap: 0;
+    padding: 1rem 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    border-radius: 0 0 8px 8px;
+    width: 100%;
+    backdrop-filter: blur(10px);
+  }
+  
+  .nav-links.mobile-open {
+    display: flex;
+  }
+  
+  .nav-links a {
+    padding: 0.875rem 1.5rem;
+    border-bottom: 1px solid rgba(90, 62, 54, 0.1);
+    font-size: 1rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .nav-links a:last-child {
+    border-bottom: none;
+  }
+  
+  .nav-links a:hover {
+    background-color: rgba(90, 62, 54, 0.08);
+    text-decoration: none;
+  }
+}
+/* Signup Section - Mobile-first responsive */
 .signup-section {
   display: flex;
   justify-content: center;
-  padding: 3rem 1rem;
+  align-items: center;
+  padding: 1.5rem;
   background: url('https://www.cnu.org/sites/default/files/styles/public_square_feature_image/public/BostonCollege1.jpg?itok=iKc35HST') no-repeat center center/cover;
-  min-height: 100vh;
+  min-height: calc(100vh - 80px);
+  background-attachment: scroll; /* Better performance on mobile */
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .signup-section {
+    padding: 3rem 1rem;
+    min-height: 100vh;
+    background-attachment: fixed;
+  }
 }
 
 .signup-box {
-  background: rgba(255,255,255,0.95);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.97);
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
   width: 100%;
   max-width: 500px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .signup-box {
+    padding: 2.5rem;
+  }
 }
 
 .signup-box h2 {
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
   color: #2c3e50;
   border-bottom: 2px solid #c28d6f;
   display: inline-block;
   padding-bottom: 0.3rem;
+  text-align: center;
+  width: 100%;
 }
 
+/* Tablet and up */
+@media (min-width: 768px) {
+  .signup-box h2 {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile-friendly form inputs */
 .signup-box input, .signup-box select {
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  background-color: #f9fafb;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Focus states for better accessibility */
+.signup-box input:focus, .signup-box select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
 }
 
 #password-strength {
   font-weight: bold;
   margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
+/* Touch-friendly buttons */
 .signup-box button {
   width: 100%;
-  padding: 0.8rem;
+  padding: 1rem;
   background: #0f172a;
   color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 48px; /* Touch-friendly minimum size */
+  font-weight: 600;
 }
+
 .signup-box button:hover {
   background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+}
+
+.signup-box button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.3);
 }
 
 /* OTP Verification Styles */
@@ -185,18 +334,67 @@ body {
   background: #047857 !important;
 }
 
-input[type=tel]{
-padding-right: 500px;
-padding-left: 36px;
-
+/* Phone input specific styling */
+.phone-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
 }
 
+input[type=tel] {
+  padding-left: 60px !important;
+  padding-right: 1rem !important;
+}
 
+/* International telephone input plugin adjustments */
+.iti {
+  width: 100% !important;
+}
+
+.iti__country-list {
+  z-index: 1050;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Mobile-specific OTP adjustments */
+@media (max-width: 480px) {
+  .otp-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  #otp-code {
+    font-size: 1.2rem;
+    letter-spacing: 0.3rem;
+  }
+  
+  .signup-box {
+    padding: 1.25rem;
+    margin: 0.75rem;
+  }
+  
+  .signup-box h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Footer - Mobile responsive */
 .footer {
   text-align: center;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
   background: #f8efe6;
   font-size: 0.9rem;
   color: #5a3e36;
+}
+
+/* Additional accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .signup-box button:hover {
+    transform: none;
+  }
+  
+  .signup-box button:active {
+    transform: none;
+  }
 }
 

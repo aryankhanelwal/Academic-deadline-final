@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Academic Tracker</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/navbar.css" />
   <style>
     * {
   box-sizing: border-box;
@@ -16,8 +17,16 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: url('https://www.cnu.org/sites/default/files/styles/public_square_feature_image/public/BostonCollege1.jpg?itok=iKc35HST') no-repeat center center fixed;
+      background: url('https://www.cnu.org/sites/default/files/styles/public_square_feature_image/public/BostonCollege1.jpg?itok=iKc35HST') no-repeat center center;
       background-size: cover;
+      background-attachment: scroll; /* Better performance on mobile */
+    }
+    
+    /* Desktop - use fixed attachment for better visual effect */
+    @media (min-width: 1024px) {
+      body {
+        background-attachment: fixed;
+      }
     }
 
     .overlay {
@@ -27,72 +36,67 @@
       margin: 0;
     }
 
-.navbar {
-  width: 100%;
-  background-color: #fff4e6;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  position: sticky;
-  top: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #5a3e36;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 1.5rem;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #5a3e36;
-  font-weight: 500;
-}
-
-.nav-links a:hover {
-  color: #8b5e3c;
-  text-decoration: underline;
-}
+/* Navbar styles now handled by navbar.css */
 
     .login-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: calc(100vh - 80px);
+      min-height: calc(100vh - 80px);
+      padding: 1rem;
     }
 
     .login-box {
       background-color: rgba(255, 255, 255, 0.95);
-      padding: 2rem;
+      padding: 1.5rem;
       border-radius: 12px;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
       width: 100%;
       max-width: 400px;
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Tablet and up */
+    @media (min-width: 768px) {
+      .login-box {
+        padding: 2rem;
+      }
     }
 
     .login-box h2 {
       text-align: center;
       margin-bottom: 1.5rem;
       color: #333;
+      font-size: 1.6rem;
+      line-height: 1.3;
+    }
+    
+    /* Tablet and up */
+    @media (min-width: 768px) {
+      .login-box h2 {
+        font-size: 1.8rem;
+      }
     }
 
     .login-box input[type="email"],
     .login-box input[type="password"] {
       width: 100%;
-      padding: 0.9rem;
+      padding: 1rem;
       margin: 0.7rem 0;
       border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 16px; /* Prevent zoom on iOS */
+      line-height: 1.5;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    
+    .login-box input[type="email"]:focus,
+    .login-box input[type="password"]:focus {
+      border-color: #3a57e8;
+      box-shadow: 0 0 0 3px rgba(58, 87, 232, 0.1);
+      outline: none;
     }
 
     .toggle-pass {
@@ -103,11 +107,21 @@
 
 .toggle-pass input {
   width: 100%;
-  padding: 0.9rem;
-  padding-right: 2.5rem; /* Add padding so the icon doesn’t overlap */
+  padding: 1rem;
+  padding-right: 2.5rem; /* Add padding so the icon doesn't overlap */
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 16px; /* Prevent zoom on iOS */
+  line-height: 1.5;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.toggle-pass input:focus {
+  border-color: #3a57e8;
+  box-shadow: 0 0 0 3px rgba(58, 87, 232, 0.1);
+  outline: none;
 }
 
 .toggle-pass i {
@@ -128,6 +142,20 @@
       border-radius: 8px;
       cursor: pointer;
       margin-top: 1rem;
+      min-height: 48px; /* Touch-friendly minimum size */
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .login-box button:hover {
+      background: #2845d4;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(58, 87, 232, 0.3);
+    }
+    
+    .login-box button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(58, 87, 232, 0.3);
     }
 
     .extra {
@@ -186,7 +214,11 @@
       .then(response => response.text())
       .then(data => {
         document.getElementById('navbar-placeholder').innerHTML = data;
+      })
+      .catch(error => {
+        console.error('Error loading navbar:', error);
       });
+      
     const togglePassword = document.getElementById("togglePassword");
     const passwordField = document.getElementById("login-password");
 
@@ -196,6 +228,11 @@
       togglePassword.classList.toggle("fa-eye-slash");
     });
 
+    // Debug: Check if login.js is loaded
+    console.log('Login page scripts loaded');
+    console.log('Form element:', document.getElementById('login-form'));
+    console.log('Email element:', document.getElementById('login-email'));
+    console.log('Password element:', document.getElementById('login-password'));
 
     
   </script>
