@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0-jammy
+    container_name: academic_deadline_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: test
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - academic_network
+
+  # Academic Deadline Tracker Application
+  app:
+    build: . # Assuming Dockerfile is in the current directory
+    container_name: academic_deadline_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGO_URI=mongodb://mongodb:27017/test
+      - SESSION_SECRET=a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d
+      # Email Configuration
+      - EMAIL_USER=2002ak2002@gmail.com
+      - EMAIL_PASS=prgi uvhi dpri wlaz
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      # Twilio Configuration
+      - TWILIO_ACCOUNT_SID=ACee47a780e6b96d14076c87aa3fdaab64
+      - TWILIO_AUTH_TOKEN=653c5599ecdc81d56a6f8664c6ac477c
+      - TWILIO_PHONE_NUMBER=+18788812691
+    depends_on:
+      - mongodb
+    networks:
+      - academic_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  academic_network:
+    driver: bridge
