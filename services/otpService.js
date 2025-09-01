@@ -153,10 +153,28 @@ class OTPService {
 
     } catch (error) {
       console.error('❌ Failed to send OTP:', error.message);
+      console.error('❌ Twilio Error Details:', {
+        code: error.code,
+        moreInfo: error.moreInfo,
+        status: error.status,
+        details: error.details
+      });
+      
+      // Provide more specific error messages
+      let userMessage = 'Failed to send OTP. Please try again.';
+      if (error.code === 21211) {
+        userMessage = 'Invalid phone number format. Please check your phone number.';
+      } else if (error.code === 21608) {
+        userMessage = 'Phone number not verified. For trial accounts, verify the number in Twilio Console first.';
+      } else if (error.code === 21614) {
+        userMessage = 'Invalid phone number. Please check the number format.';
+      }
+      
       return {
         success: false,
-        message: 'Failed to send OTP. Please try again.',
-        error: error.message
+        message: userMessage,
+        error: error.message,
+        twilioCode: error.code
       };
     }
   }
