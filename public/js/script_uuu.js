@@ -121,7 +121,7 @@ async function markComplete(id) {
 }
 
 async function deleteTask(id) {
-  await fetch(`http://localhost:3000/tasks/${id}`, {
+  await fetch(`http://13.232.189.221:3000/tasks/${id}`, {
     method: "DELETE",
     credentials: 'include'
   });
