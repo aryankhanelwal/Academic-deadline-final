@@ -100,7 +100,7 @@ services:
       - EMAIL_HOST=smtp.gmail.com
       - EMAIL_PORT=587
       - TWILIO_ACCOUNT_SID=ACee47a780e6b96d14076c87aa3fdaab64
-      - TWILIO_AUTH_TOKEN=653c5599ecdc81d56a6f8664c6ac477c
+      - TWILIO_AUTH_TOKEN=5436b2ee490659bc2b55e369d1cc0d3e
       - TWILIO_PHONE_NUMBER=+18788812691
     depends_on:
       - mongodb
