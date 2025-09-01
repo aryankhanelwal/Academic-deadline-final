@@ -13,22 +13,8 @@ const phoneInput = intlTelInput(document.querySelector("#phone"), {
   utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
 }); // Validates, auto-sets user country, and formats the number
 
-// Fetch country codes and populate the country select dropdown
-fetch('https://gist.githubusercontent.com/anubhavshrimal/75f6183458db8c453306f93521e93d37/raw/CountryCodes.json')
-  .then(res => res.json())
-  .then(data => {
-    const select = document.getElementById('countryCode');
-    select.innerHTML = '<option value="">Select country</option>'; // Populate the field
-    data.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.dial_code;
-      opt.text = `${c.name} (${c.dial_code})`; // e.g., India (+91)
-      select.appendChild(opt);
-    });
-  })
-  .catch(() => {
-    document.getElementById('countryCode').innerHTML = '<option value="">Could not load</option>';
-  });
+// Country selection is handled automatically by intl-tel-input plugin
+// No additional country dropdown needed
 
 // Password strength meter logic
 const password = document.getElementById("password");
