@@ -1,0 +1,92 @@
+# MongoDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:6.0-jammy
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_DATABASE
+          value: "test"
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017
+    targetPort: 27017
+---
+# App Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: academic-deadline-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: academic-deadline-app
+  template:
+    metadata:
+      labels:
+        app: academic-deadline-app
+    spec:
+      containers:
+      - name: app
+        image: academic-deadline-app:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: PORT
+          value: "3000"
+        - name: MONGO_URI
+          value: "mongodb://mongodb:27017/test"
+        - name: SESSION_SECRET
+          value: "a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d"
+        - name: EMAIL_USER
+          value: "2002ak2002@gmail.com"
+        - name: EMAIL_PASS
+          value: "prgi uvhi dpri wlaz"
+        - name: EMAIL_HOST
+          value: "smtp.gmail.com"
+        - name: EMAIL_PORT
+          value: "587"
+        - name: TWILIO_ACCOUNT_SID
+          value: "ACee47a780e6b96d14076c87aa3fdaab64"
+        - name: TWILIO_AUTH_TOKEN
+          value: "653c5599ecdc81d56a6f8664c6ac477c"
+        - name: TWILIO_PHONE_NUMBER
+          value: "+18788812691"
+---
+# App Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: academic-deadline-app
+spec:
+  selector:
+    app: academic-deadline-app
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: LoadBalancer
