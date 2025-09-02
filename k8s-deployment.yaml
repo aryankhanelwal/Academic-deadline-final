@@ -44,20 +44,6 @@ data:
   EMAIL_HOST: "smtp.gmail.com"
   EMAIL_PORT: "587"
 ---
-# Persistent Volume Claim for MongoDB
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongodb-pvc
-  namespace: academic-deadline
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: gp2   # if on AWS EKS; adjust based on your cluster
----
 # MongoDB Deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -83,16 +69,16 @@ spec:
             - containerPort: 27017
           envFrom:
             - secretRef:
-                name: mongo-secret
+                name: mongo-secretA
           volumeMounts:
             - name: mongodb-storage
               mountPath: /data/db
       volumes:
         - name: mongodb-storage
-          persistentVolumeClaim:
-            claimName: mongodb-pvc
+          hostPath:
+            path: /var/lib/mongodb
+            type: DirectoryOrCreate
 ---
-# MongoDB Service
 apiVersion: v1
 kind: Service
 metadata:
