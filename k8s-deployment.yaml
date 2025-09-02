@@ -61,7 +61,8 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: standard   # 👈 Added StorageClass binding
+  storageClassName: gp2   # 👈 use AWS default EBS storage class
+
 ---
 # MongoDB Service
 apiVersion: v1
