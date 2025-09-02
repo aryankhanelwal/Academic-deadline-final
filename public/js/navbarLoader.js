@@ -4,7 +4,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   let username = '';
   
   try {
-    const response = await fetch('/api/check-auth', {
+    const response = await fetch('http://a13340b744ef94290a249d366d1430c3-1703614283.ap-south-1.elb.amazonaws.com/api/check-auth', {
       method: 'GET',
       credentials: 'include' // Include session cookies
     });
