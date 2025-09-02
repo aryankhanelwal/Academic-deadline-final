@@ -5,6 +5,8 @@ pipeline {
         string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Docker image tag (e.g., v1.0)')
         string(name: 'CONTAINER_NAME', defaultValue: 'academic_deadline_app', description: 'App container name')
         string(name: 'HOST_PORT', defaultValue: '3000', description: 'Host port number')
+        choice(name: 'DEPLOYMENT_TYPE', choices: ['docker-compose', 'kubernetes', 'both'], description: 'Choose deployment method')
+        string(name: 'K8S_NAMESPACE', defaultValue: 'default', description: 'Kubernetes namespace')
     }
 
     environment {
@@ -64,9 +66,12 @@ pipeline {
         }
 
         stage('Deploy with Docker Compose') {
+            when {
+                expression { params.DEPLOYMENT_TYPE == 'docker-compose' || params.DEPLOYMENT_TYPE == 'both' }
+            }
             steps {
                 script {
-                    echo "🚀 Deploying with Docker Compose..."
+                    echo "🐳 Deploying with Docker Compose..."
                     writeFile file: 'docker-compose.yml', text: """
 version: '3.8'
 
@@ -116,6 +121,52 @@ networks:
                     """
                     sh 'docker compose down || true'
                     sh 'docker compose up -d'
+                    echo "✅ Docker Compose deployment completed!"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            when {
+                expression { params.DEPLOYMENT_TYPE == 'kubernetes' || params.DEPLOYMENT_TYPE == 'both' }
+            }
+            steps {
+                script {
+                    echo "☸️ Deploying to Kubernetes..."
+                    
+                    // Create Kubernetes secret for sensitive environment variables
+                    sh """
+                        kubectl create secret generic app-secrets \
+                            --from-literal=SESSION_SECRET='a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d' \
+                            --from-literal=EMAIL_USER='2002ak2002@gmail.com' \
+                            --from-literal=EMAIL_PASS='prgi uvhi dpri wlaz' \
+                            --from-literal=TWILIO_ACCOUNT_SID='ACee47a780e6b96d14076c87aa3fdaab64' \
+                            --from-literal=TWILIO_AUTH_TOKEN='5436b2ee490659bc2b55e369d1cc0d3e' \
+                            --from-literal=TWILIO_PHONE_NUMBER='+18788812691' \
+                            --namespace=${K8S_NAMESPACE} \
+                            --dry-run=client -o yaml | kubectl apply -f -
+                    """
+                    
+                    // Update the image in the Kubernetes manifest
+                    sh """
+                        sed -i 's|image: academic-deadline-app:latest|image: ${ECR_REPO}:${IMAGE_TAG}|g' k8s-deployment.yaml
+                    """
+                    
+                    // Apply Kubernetes manifests
+                    sh """
+                        kubectl apply -f k8s-deployment.yaml --namespace=${K8S_NAMESPACE}
+                        kubectl rollout status deployment/academic-deadline-app --namespace=${K8S_NAMESPACE} --timeout=300s
+                    """
+                    
+                    // Get service information
+                    sh """
+                        echo "📋 Kubernetes deployment status:"
+                        kubectl get pods,services --namespace=${K8S_NAMESPACE} -l app=academic-deadline-app
+                        echo "🌐 Service endpoints:"
+                        kubectl get service academic-deadline-app --namespace=${K8S_NAMESPACE} -o wide
+                    """
+                    
+                    echo "✅ Kubernetes deployment completed!"
                 }
             }
         }
