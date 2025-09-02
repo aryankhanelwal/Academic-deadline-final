@@ -57,17 +57,13 @@ spec:
                 name: mongo-secret
           volumeMounts:
             - name: mongodb-storage
-              mountPath: /data/db
-          # resources:
-          #   requests:
-          #     memory: "256Mi"
-          #     cpu: "250m"
-          #   limits:
-          #     memory: "512Mi"
-          #     cpu: "500m"
+              mountPath: /data/db   # ✅ Correct MongoDB data path
       volumes:
         - name: mongodb-storage
-          emptyDir: {}   # Replace later with PVC for persistence
+          hostPath:
+            path: /var/lib/mongodb   # ✅ Path on the node
+            type: DirectoryOrCreate   # Create directory if it doesn’t exist
+
 ---
 # MongoDB Service
 apiVersion: v1
