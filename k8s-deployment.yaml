@@ -1,20 +1,40 @@
-# StorageClass for AWS EBS
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
 metadata:
-  name: standard
-provisioner: kubernetes.io/aws-ebs
-parameters:
-  type: gp2
-  fsType: ext4
-reclaimPolicy: Retain
-volumeBindingMode: WaitForFirstConsumer
+  name: academic-deadline
+---
+# Mongo Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+  namespace: academic-deadline
+type: Opaque
+stringData:
+  MONGO_INITDB_ROOT_USERNAME: root
+  MONGO_INITDB_ROOT_PASSWORD: password123
+---
+# App ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: academic-deadline-config
+  namespace: academic-deadline
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  MONGO_URI: "mongodb://root:password123@mongodb:27017/test?authSource=admin"
+  EMAIL_HOST: "smtp.gmail.com"
+  EMAIL_PORT: "587"
 ---
 # MongoDB Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongodb
+  namespace: academic-deadline
   labels:
     app: mongodb
 spec:
@@ -28,60 +48,46 @@ spec:
         app: mongodb
     spec:
       containers:
-      - name: mongodb
-        image: mongo:6.0-jammy
-        ports:
-        - containerPort: 27017
-        env:
-        - name: MONGO_INITDB_DATABASE
-          value: "test"
-        volumeMounts:
-        - name: mongodb-storage
-          mountPath: /data/db
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: mongodb
+          image: mongo:6.0-jammy
+          ports:
+            - containerPort: 27017
+          envFrom:
+            - secretRef:
+                name: mongo-secret
+          volumeMounts:
+            - name: mongodb-storage
+              mountPath: /data/db
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       volumes:
-      - name: mongodb-storage
-        persistentVolumeClaim:
-          claimName: mongodb-pvc
----
-# MongoDB PersistentVolumeClaim
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongodb-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
-  storageClassName: gp2   # 👈 use AWS default EBS storage class
-
+        - name: mongodb-storage
+          emptyDir: {}   # Replace later with PVC for persistence
 ---
 # MongoDB Service
 apiVersion: v1
 kind: Service
 metadata:
   name: mongodb
+  namespace: academic-deadline
 spec:
   selector:
     app: mongodb
   ports:
-  - port: 27017
-    targetPort: 27017
-  type: ClusterIP
+    - port: 27017
+      targetPort: 27017
 ---
 # App Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: academic-deadline-app
+  namespace: academic-deadline
   labels:
     app: academic-deadline-app
 spec:
@@ -95,90 +101,56 @@ spec:
         app: academic-deadline-app
     spec:
       containers:
-      - name: app
-        image: academic-deadline-app:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: PORT
-          value: "3000"
-        - name: MONGO_URI
-          value: "mongodb://mongodb:27017/test"
-        - name: EMAIL_HOST
-          value: "smtp.gmail.com"
-        - name: EMAIL_PORT
-          value: "587"
-        - name: SESSION_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: SESSION_SECRET
-        - name: EMAIL_USER
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: EMAIL_USER
-        - name: EMAIL_PASS
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: EMAIL_PASS
-        - name: TWILIO_ACCOUNT_SID
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: TWILIO_ACCOUNT_SID
-        - name: TWILIO_AUTH_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: TWILIO_AUTH_TOKEN
-        - name: TWILIO_PHONE_NUMBER
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: TWILIO_PHONE_NUMBER
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: academic-deadline-app
+          image: academic-deadline-app:latest   # ✅ Replace with your DockerHub/ECR image
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: academic-deadline-config
+            - secretRef:
+                name: app-secrets   # keep your existing app secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ---
 # App Service
 apiVersion: v1
 kind: Service
 metadata:
-  name: academic-deadline-app
+  name: academic-deadline-service
+  namespace: academic-deadline
 spec:
+  type: LoadBalancer
   selector:
     app: academic-deadline-app
   ports:
-  - port: 80
-    targetPort: 3000
-    protocol: TCP
-  type: LoadBalancer
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
 ---
 # Horizontal Pod Autoscaler
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: academic-deadline-app-hpa
+  namespace: academic-deadline
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -187,15 +159,15 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
