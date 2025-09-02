@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       console.log('Sending login request to /api/login');
       
-      const response = await fetch("/api/login", {
+      const response = await fetch("http://a13340b744ef94290a249d366d1430c3-1703614283.ap-south-1.elb.amazonaws.com/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // Important: Include cookies for session
