@@ -16,7 +16,22 @@ stringData:
   MONGO_INITDB_ROOT_USERNAME: root
   MONGO_INITDB_ROOT_PASSWORD: password123
 ---
-# App ConfigMap
+# App Secret (sensitive info: passwords, session secret, Twilio tokens)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: academic-deadline-secret
+  namespace: academic-deadline
+type: Opaque
+stringData:
+  EMAIL_USER: 2002ak2002@gmail.com
+  EMAIL_PASS: "prgi uvhi dpri wlaz"
+  SESSION_SECRET: a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d
+  TWILIO_ACCOUNT_SID: ACee47a780e6b96d14076c87aa3fdaab64
+  TWILIO_AUTH_TOKEN: ff29c652e4b174b290a67defd1277fc2
+  TWILIO_PHONE_NUMBER: "+18788812691"
+---
+# App ConfigMap (non-sensitive values)
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -25,7 +40,7 @@ metadata:
 data:
   NODE_ENV: "production"
   PORT: "3000"
-  MONGO_URI: "mongodb://root:password123@mongodb:27017/test?authSource=admin" 
+  MONGO_URI: "mongodb://mongodb:27017/test"
   EMAIL_HOST: "smtp.gmail.com"
   EMAIL_PORT: "587"
 ---
@@ -57,11 +72,11 @@ spec:
                 name: mongo-secret
           volumeMounts:
             - name: mongodb-storage
-              mountPath: /data/db   # ✅ correct MongoDB default path
+              mountPath: /data/db
       volumes:
         - name: mongodb-storage
           hostPath:
-            path: /var/lib/mongodb  # ✅ directory on node
+            path: /var/lib/mongodb
             type: DirectoryOrCreate
 ---
 apiVersion: v1
@@ -96,33 +111,14 @@ spec:
     spec:
       containers:
         - name: academic-deadline-app
-          image: academic-deadline-app:latest   # ✅ Replace with your DockerHub/ECR image
+          image: academic-deadline-app:latest
           ports:
             - containerPort: 3000
           envFrom:
             - configMapRef:
                 name: academic-deadline-config
-          #   - secretRef:
-          #       name: app-secrets   # keep your existing app secrets
-          # resources:
-          #   requests:
-          #     memory: "256Mi"
-          #     cpu: "250m"
-          #   limits:
-          #     memory: "512Mi"
-          #     cpu: "500m"
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 3000
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 10
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: 3000
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 5
+            - secretRef:
+                name: academic-deadline-secret
 ---
 # App Service
 apiVersion: v1
@@ -138,30 +134,3 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
----
-# # Horizontal Pod Autoscaler
-# apiVersion: autoscaling/v2
-# kind: HorizontalPodAutoscaler
-# metadata:
-#   name: academic-deadline-app-hpa
-#   namespace: academic-deadline
-# spec:
-#   scaleTargetRef:
-#     apiVersion: apps/v1
-#     kind: Deployment
-#     name: academic-deadline-app
-#   minReplicas: 2
-#   maxReplicas: 10
-#   metrics:
-#     - type: Resource
-#       resource:
-#         name: cpu
-#         target:
-#           type: Utilization
-#           averageUtilization: 70
-#     - type: Resource
-#       resource:
-#         name: memory
-#         target:
-#           type: Utilization
-#           averageUtilization: 80
