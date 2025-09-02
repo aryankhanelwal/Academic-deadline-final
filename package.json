@@ -4,7 +4,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "dev:host": "HOST=0.0.0.0 nodemon server.js",
+    "start:local": "HOST=127.0.0.1 node server.js",
+    "network-info": "node -e \"console.log(require('./utils/networkUtils').getNetworkInterfaces())\""
   },
   "keywords": [],
   "author": "",

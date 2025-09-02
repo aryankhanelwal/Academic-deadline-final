@@ -1,4 +1,26 @@
 // frontend/script.js
+
+// Dynamic API base URL configuration
+const API_CONFIG = {
+  // Automatically detect the current server URL
+  getBaseURL: function() {
+    // Use current window location for the base URL
+    const protocol = window.location.protocol; // http: or https:
+    const hostname = window.location.hostname; // e.g., localhost, 192.168.1.100
+    const port = window.location.port; // e.g., 3000
+    
+    // Construct base URL
+    const baseUrl = `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+    console.log('🌐 Using API base URL:', baseUrl);
+    return baseUrl;
+  },
+  
+  // Get full API endpoint URL
+  getURL: function(endpoint) {
+    return `${this.getBaseURL()}${endpoint}`;
+  }
+};
+
 const taskForm = document.getElementById("taskForm");
 let editingTaskId = null; // Track which task is being edited
 let allTasks = []; // Global storage for all tasks to enable filtering
@@ -19,7 +41,7 @@ function getCategoryInfo(category) {
 }
 
 async function fetchTasks() {
-  const response = await fetch("http://13.232.189.221:3000/tasks", {
+  const response = await fetch(API_CONFIG.getURL('/tasks'), {
     credentials: 'include'
   });
   allTasks = await response.json(); // Store tasks globally
@@ -120,7 +142,7 @@ async function submitTaskForm(e) {
   };
   
   const method = editingTaskId ? "PUT" : "POST";
-  const url = editingTaskId ? `http://13.232.189.221:3000/tasks/${editingTaskId}` : "http://13.232.189.221:3000/tasks/add";
+  const url = editingTaskId ? API_CONFIG.getURL(`/tasks/${editingTaskId}`) : API_CONFIG.getURL('/tasks/add');
 
   await fetch(url, {
     method: method,
@@ -148,7 +170,7 @@ async function submitTaskForm(e) {
 }
 
 async function editTask(id) {
-  const response = await fetch(`http://13.232.189.221:3000/tasks/${id}`, {
+  const response = await fetch(API_CONFIG.getURL(`/tasks/${id}`), {
     credentials: 'include'
   });
   const task = await response.json();
@@ -156,7 +178,7 @@ async function editTask(id) {
 }
 
 async function markComplete(id) {
-  await fetch(`http://13.232.189.221:3000/tasks/${id}`, {
+  await fetch(API_CONFIG.getURL(`/tasks/${id}`), {
     method: 'DELETE',
     credentials: 'include'
   });
@@ -164,7 +186,7 @@ async function markComplete(id) {
 }
 
 async function deleteTask(id) {
-  await fetch(`http://13.232.189.221:3000/tasks/${id}`, {
+  await fetch(API_CONFIG.getURL(`/tasks/${id}`), {
     method: "DELETE",
     credentials: 'include'
   });
