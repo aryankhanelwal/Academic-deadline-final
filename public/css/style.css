@@ -501,6 +501,50 @@ h1 {
   margin-right: 6px;
 }
 
+/* Task Meta - Priority and Recurring badges */
+.task-meta {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.priority-badge,
+.recurring-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.priority-badge {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fbbf24;
+}
+
+.recurring-badge {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #60a5fa;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .task-meta {
+    justify-content: flex-start;
+  }
+  
+  .priority-badge,
+  .recurring-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
 /* Priority and Status */
 .priority { border-left-color: #facc15; } /* Yellow */
 .soon .status { color: #f59e0b; font-weight: bold; }

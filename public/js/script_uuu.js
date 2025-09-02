@@ -49,6 +49,10 @@ function displayTasks(tasks) {
         <span class="category"><i class="fas ${categoryInfo.icon}"></i> ${task.category}</span>
         <span class="status">${daysLeft < 0 ? `⚠️ Overdue: ${due.toDateString().slice(4)}` : `⏰ Due: ${due.toDateString().slice(4)}`}</span>
       </div>
+      <div class="task-meta">
+        ${task.isPriority ? '<span class="priority-badge">⭐ Priority</span>' : ''}
+        ${task.isRecurring ? '<span class="recurring-badge">🔄 Recurring</span>' : ''}
+      </div>
       <h3>${task.title}</h3>
       <p>${task.notes || ''}</p>
       <div class="controls">
@@ -72,9 +76,35 @@ function loadTaskIntoForm(task) {
   document.getElementById("category").value = task.category;
   document.getElementById("date").value = task.date.split("T")[0];
   document.getElementById("notes").value = task.notes || "";
-  document.getElementById("isPriority").checked = task.isPriority;
-  document.getElementById("isRecurring").checked = task.isRecurring;
+  document.getElementById("isPriority").checked = task.isPriority || false;
+  document.getElementById("isRecurring").checked = task.isRecurring || false;
   editingTaskId = task._id;
+  
+  // Update submit button text and add cancel button
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.textContent = "✏️ Update Task";
+  submitBtn.style.backgroundColor = "#f59e0b";
+  
+  // Add cancel button if it doesn't exist
+  if (!document.getElementById("cancel-btn")) {
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.id = "cancel-btn";
+    cancelBtn.textContent = "❌ Cancel";
+    cancelBtn.style.backgroundColor = "#6b7280";
+    cancelBtn.style.color = "white";
+    cancelBtn.style.border = "none";
+    cancelBtn.style.borderRadius = "8px";
+    cancelBtn.style.padding = "1rem 1.2rem";
+    cancelBtn.style.fontSize = "1rem";
+    cancelBtn.style.cursor = "pointer";
+    cancelBtn.style.minHeight = "48px";
+    cancelBtn.style.width = "100%";
+    cancelBtn.style.marginTop = "0.5rem";
+    
+    cancelBtn.onclick = cancelEdit;
+    submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+  }
 }
 
 async function submitTaskForm(e) {
@@ -99,8 +129,21 @@ async function submitTaskForm(e) {
     body: JSON.stringify(taskData)
   });
 
+  // Reset form and restore default state
   taskForm.reset();
   editingTaskId = null;
+  
+  // Reset submit button to default state
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.textContent = "➕ Add Task";
+  submitBtn.style.backgroundColor = "#3b82f6";
+  
+  // Remove cancel button if it exists
+  const cancelBtn = document.getElementById("cancel-btn");
+  if (cancelBtn) {
+    cancelBtn.remove();
+  }
+  
   fetchTasks();
 }
 
@@ -215,5 +258,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// Cancel edit function
+function cancelEdit() {
+  // Reset form and clear editing state
+  taskForm.reset();
+  editingTaskId = null;
+  
+  // Reset submit button to default state
+  const submitBtn = document.getElementById("submit-btn");
+  submitBtn.textContent = "➕ Add Task";
+  submitBtn.style.backgroundColor = "#3b82f6";
+  
+  // Remove cancel button
+  const cancelBtn = document.getElementById("cancel-btn");
+  if (cancelBtn) {
+    cancelBtn.remove();
+  }
+}
 
 fetchTasks();
