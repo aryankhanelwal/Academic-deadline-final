@@ -57,15 +57,13 @@ spec:
                 name: mongo-secret
           volumeMounts:
             - name: mongodb-storage
-              mountPath: /data/db   # ✅ Correct MongoDB data path
+              mountPath: /data/db   # ✅ correct MongoDB default path
       volumes:
         - name: mongodb-storage
           hostPath:
-            path: /var/lib/mongodb   # ✅ Path on the node
-            type: DirectoryOrCreate   # Create directory if it doesn’t exist
-
+            path: /var/lib/mongodb  # ✅ directory on node
+            type: DirectoryOrCreate
 ---
-# MongoDB Service
 apiVersion: v1
 kind: Service
 metadata:
