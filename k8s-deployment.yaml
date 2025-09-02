@@ -1,3 +1,15 @@
+# StorageClass for AWS EBS
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+  fsType: ext4
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+---
 # MongoDB Deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -49,6 +61,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  storageClassName: standard   # 👈 Added StorageClass binding
 ---
 # MongoDB Service
 apiVersion: v1
