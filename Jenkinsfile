@@ -133,61 +133,64 @@ stage('Deploy to Kubernetes') {
     steps {
         script {
             echo "☸️ Deploying to Kubernetes..."
-            
-            // Update kubeconfig for EKS
-            sh """
-                echo "🔑 Updating kubeconfig for EKS..."
-                aws eks update-kubeconfig --name aryan-capsule-cluster --region ${AWS_REGION}
-            """
-            
-            // Test kubectl connectivity first
-            sh """
-                echo "🔍 Testing kubectl connectivity..."
-                kubectl cluster-info --request-timeout=10s
-                kubectl get nodes --request-timeout=10s
-            """
-            
-            // Create namespace if it doesn't exist
-            sh """
-                kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-            """
-            
-            // Create Kubernetes secret for sensitive environment variables
-            sh """
-                kubectl create secret generic app-secrets \
-                    --from-literal=SESSION_SECRET='a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d' \
-                    --from-literal=EMAIL_USER='2002ak2002@gmail.com' \
-                    --from-literal=EMAIL_PASS='prgi uvhi dpri wlaz' \
-                    --from-literal=TWILIO_ACCOUNT_SID='ACee47a780e6b96d14076c87aa3fdaab64' \
-                    --from-literal=TWILIO_AUTH_TOKEN='5436b2ee490659bc2b55e369d1cc0d3e' \
-                    --from-literal=TWILIO_PHONE_NUMBER='+18788812691' \
-                    --namespace=${K8S_NAMESPACE} \
-                    --dry-run=client -o yaml | kubectl apply -f - || echo "Secret creation failed, continuing..."
-            """
-            
-            // Update the image in the Kubernetes manifest
-            sh """
-                sed -i 's|image: academic-deadline-app:latest|image: ${ECR_REPO}:${IMAGE_TAG}|g' k8s-deployment.yaml
-            """
-            
-            // Apply Kubernetes manifests
-            sh """
-                echo "📦 Applying Kubernetes manifests..."
-                kubectl apply -f k8s-deployment.yaml --namespace=${K8S_NAMESPACE} --validate=false
+
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Credentials']]) {
                 
-                echo "⏳ Waiting for deployment to be ready..."
-                kubectl rollout status deployment/academic-deadline-app --namespace=${K8S_NAMESPACE} --timeout=300s
-            """
-            
-            // Get service information
-            sh """
-                echo "📋 Kubernetes deployment status:"
-                kubectl get pods,services --namespace=${K8S_NAMESPACE} -l app=academic-deadline-app
-                echo "🌐 Service endpoints:"
-                kubectl get service academic-deadline-app --namespace=${K8S_NAMESPACE} -o wide || echo "Service not found"
-            """
-            
-            echo "✅ Kubernetes deployment completed!"
+                // Update kubeconfig for EKS
+                sh """
+                    echo "🔑 Updating kubeconfig for EKS..."
+                    aws eks update-kubeconfig --name aryan-capsule-cluster --region ${AWS_REGION}
+                """
+                
+                // Test kubectl connectivity first
+                sh """
+                    echo "🔍 Testing kubectl connectivity..."
+                    kubectl cluster-info --request-timeout=10s
+                    kubectl get nodes --request-timeout=10s
+                """
+                
+                // Create namespace if it doesn't exist
+                sh """
+                    kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+                """
+                
+                // Create Kubernetes secret for sensitive environment variables
+                sh """
+                    kubectl create secret generic app-secrets \
+                        --from-literal=SESSION_SECRET='a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d' \
+                        --from-literal=EMAIL_USER='2002ak2002@gmail.com' \
+                        --from-literal=EMAIL_PASS='prgi uvhi dpri wlaz' \
+                        --from-literal=TWILIO_ACCOUNT_SID='ACee47a780e6b96d14076c87aa3fdaab64' \
+                        --from-literal=TWILIO_AUTH_TOKEN='5436b2ee490659bc2b55e369d1cc0d3e' \
+                        --from-literal=TWILIO_PHONE_NUMBER='+18788812691' \
+                        --namespace=${K8S_NAMESPACE} \
+                        --dry-run=client -o yaml | kubectl apply -f - || echo "Secret creation failed, continuing..."
+                """
+                
+                // Update the image in the Kubernetes manifest
+                sh """
+                    sed -i 's|image: academic-deadline-app:latest|image: ${ECR_REPO}:${IMAGE_TAG}|g' k8s-deployment.yaml
+                """
+                
+                // Apply Kubernetes manifests
+                sh """
+                    echo "📦 Applying Kubernetes manifests..."
+                    kubectl apply -f k8s-deployment.yaml --namespace=${K8S_NAMESPACE} --validate=false
+                    
+                    echo "⏳ Waiting for deployment to be ready..."
+                    kubectl rollout status deployment/academic-deadline-app --namespace=${K8S_NAMESPACE} --timeout=300s
+                """
+                
+                // Get service information
+                sh """
+                    echo "📋 Kubernetes deployment status:"
+                    kubectl get pods,services --namespace=${K8S_NAMESPACE} -l app=academic-deadline-app
+                    echo "🌐 Service endpoints:"
+                    kubectl get service academic-deadline-app --namespace=${K8S_NAMESPACE} -o wide || echo "Service not found"
+                """
+                
+                echo "✅ Kubernetes deployment completed!"
+            }
         }
     }
 }
