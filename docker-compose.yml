@@ -34,7 +34,7 @@ services:
       - EMAIL_PORT=587
       # Twilio Configuration
       - TWILIO_ACCOUNT_SID=ACee47a780e6b96d14076c87aa3fdaab64
-      - TWILIO_AUTH_TOKEN=ff29c652e4b174b290a67defd1277fc2
+      - TWILIO_AUTH_TOKEN=98546b7edc5e97bc0f9a8d93c14dae57
       - TWILIO_PHONE_NUMBER=+18788812691
     depends_on:
       - mongodb
