@@ -237,7 +237,7 @@ h1 {
 }
 
 /* Mobile-friendly form inputs */
-.task-form input,
+.task-form input:not([type="checkbox"]),
 .task-form select,
 .task-form textarea {
   padding: 1rem;
@@ -252,7 +252,7 @@ h1 {
 }
 
 /* Focus states for better accessibility */
-.task-form input:focus,
+.task-form input:not([type="checkbox"]):focus,
 .task-form select:focus,
 .task-form textarea:focus {
   border-color: #3b82f6;
