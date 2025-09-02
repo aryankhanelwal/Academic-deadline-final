@@ -294,7 +294,7 @@ router.post("/api/verify-otp", async (req, res) => {
  * 3. If found, create session with user ID
  * 4. Return success message with user name
  */
-router.post("/api/login", async (req, res) => {
+router.post("http://a6c336835d9c24ff589c7d30b3623807-968304438.ap-south-1.elb.amazonaws.com/api/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
