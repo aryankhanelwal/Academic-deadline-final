@@ -8,12 +8,11 @@ const routes = require("./routers/route");
 const taskRoutes = require("./routers/taskRoutes");
 const reminderScheduler = require("./services/reminderScheduler");
 const mongoose = require("mongoose");
-const networkUtils = require("./utils/networkUtils");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || "0.0.0.0"; // allow external access
+const HOST = "0.0.0.0"; // allow external access
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -57,7 +56,6 @@ app.use("/tasks", taskRoutes);
 app.use(express.static(path.join(__dirname, "public")));
 
 // Start server
-app.listen(PORT, HOST, () => {
-  // Display dynamic network information
-  networkUtils.displayStartupInfo(PORT);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://13.232.189.221:${PORT}`);
 });
