@@ -296,24 +296,27 @@ router.post("/api/verify-otp", async (req, res) => {
  */
 router.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
+  console.log("Login request body:", req.body);
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password required" });
+  }
 
   try {
-    // Find user with matching email and password
     const user = await User.findOne({ email, password });
+    console.log("User found:", user);
+
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    
-    // Create session by storing user ID
+
     req.session.userId = user._id;
-    console.log("User logged in:", user.name);
-    console.log("Student ID:", user.StudentId);
-    
-    // Return success with user info
+    console.log("Session created for:", user._id);
+
     res.status(200).json({ message: "Login successful", name: user.name });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error during login" });
   }
 });
 
