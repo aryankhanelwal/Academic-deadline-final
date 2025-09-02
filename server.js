@@ -56,6 +56,6 @@ app.use("/tasks", taskRoutes);
 app.use(express.static(path.join(__dirname, "public")));
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://13.232.189.221:${PORT}`);
+app.listen(PORT,'0.0.0.0' ,() => {
+  console.log(`🚀 Server running at http://0.0.0.0:${PORT}`);
 });
