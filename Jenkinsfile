@@ -36,11 +36,11 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/aryankhanelwal/Academic-deadline-final.git'
-        BRANCH = 'master'
+        BRANCH = 'main'
         DOCKER_HUB_REPO = 'aryankhandelwallll/academic-deadline'
         AWS_REGION = 'ap-south-1'
         AWS_ACCOUNT_ID = '698031349056'
-        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/aryankhandelwal"
+        ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/academic-deadline"
     }
 
     stages {
@@ -112,10 +112,7 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 
 # Twilio Configuration - DEPRECATED (Migration to Email OTP completed)
-# These are kept for reference but are no longer used
-# TWILIO_ACCOUNT_SID=
-# TWILIO_AUTH_TOKEN=
-# TWILIO_PHONE_NUMBER=
+# SMS OTP functionality has been completely replaced with Email OTP using Nodemailer
                     """
 
                     writeFile file: 'docker-compose.yml', text: """
