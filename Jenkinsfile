@@ -1,3 +1,28 @@
+/*
+ * Academic Deadline Tracker - Jenkins CI/CD Pipeline
+ * 
+ * RECENT MIGRATION: SMS OTP (Twilio) → Email OTP (Nodemailer)
+ * Date: September 2025
+ * 
+ * Changes made:
+ * - Replaced Twilio SMS OTP with Gmail SMTP Email OTP
+ * - Updated environment variables from Twilio to Email configuration
+ * - Removed TWILIO_* environment variables from deployment
+ * - Added EMAIL_* environment variables for Nodemailer
+ * 
+ * Current Email OTP Configuration:
+ * - Provider: Gmail SMTP
+ * - Service: Nodemailer
+ * - Authentication: App Password
+ * - Port: 587 (STARTTLS)
+ * 
+ * For deployment, ensure these environment variables are set:
+ * - EMAIL_USER: Gmail address
+ * - EMAIL_PASS: Gmail app password
+ * - EMAIL_HOST: smtp.gmail.com
+ * - EMAIL_PORT: 587
+ */
+
 pipeline {
     agent any
 
@@ -72,6 +97,27 @@ pipeline {
             steps {
                 script {
                     echo "🐳 Deploying with Docker Compose..."
+                    // Create .env file for the deployment
+                    writeFile file: '.env', text: """
+NODE_ENV=production
+PORT=3000
+MONGO_URI=mongodb://mongodb:27017/test
+SESSION_SECRET=a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d
+
+# Email OTP Configuration for Nodemailer
+# Replace these with your actual Gmail credentials
+EMAIL_USER=2002ak2002@gmail.com
+EMAIL_PASS=prgi uvhi dpri wlaz
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+
+# Twilio Configuration - DEPRECATED (Migration to Email OTP completed)
+# These are kept for reference but are no longer used
+# TWILIO_ACCOUNT_SID=
+# TWILIO_AUTH_TOKEN=
+# TWILIO_PHONE_NUMBER=
+                    """
+
                     writeFile file: 'docker-compose.yml', text: """
 version: '3.8'
 
@@ -88,6 +134,12 @@ services:
       - mongodb_data:/data/db
     networks:
       - academic_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   app:
     image: ${ECR_REPO}:${IMAGE_TAG}
@@ -95,22 +147,23 @@ services:
     restart: unless-stopped
     ports:
       - "${HOST_PORT}:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=3000
       - MONGO_URI=mongodb://mongodb:27017/test
-      - SESSION_SECRET=a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d
-      - EMAIL_USER=2002ak2002@gmail.com
-      - EMAIL_PASS=prgi uvhi dpri wlaz
-      - EMAIL_HOST=smtp.gmail.com
-      - EMAIL_PORT=587
-      - TWILIO_ACCOUNT_SID=ACee47a780e6b96d14076c87aa3fdaab64
-      - TWILIO_AUTH_TOKEN=5436b2ee490659bc2b55e369d1cc0d3e
-      - TWILIO_PHONE_NUMBER=+18788812691
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - academic_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health", "||" , "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   mongodb_data:
@@ -155,14 +208,14 @@ stage('Deploy to Kubernetes') {
                 """
                 
                 // Create Kubernetes secret for sensitive environment variables
+                // Note: Email OTP configuration (Nodemailer) - Twilio credentials removed
                 sh """
                     kubectl create secret generic app-secrets \
                         --from-literal=SESSION_SECRET='a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d' \
                         --from-literal=EMAIL_USER='2002ak2002@gmail.com' \
                         --from-literal=EMAIL_PASS='prgi uvhi dpri wlaz' \
-                        --from-literal=TWILIO_ACCOUNT_SID='ACee47a780e6b96d14076c87aa3fdaab64' \
-                        --from-literal=TWILIO_AUTH_TOKEN='5436b2ee490659bc2b55e369d1cc0d3e' \
-                        --from-literal=TWILIO_PHONE_NUMBER='+18788812691' \
+                        --from-literal=EMAIL_HOST='smtp.gmail.com' \
+                        --from-literal=EMAIL_PORT='587' \
                         --namespace=${K8S_NAMESPACE} \
                         --dry-run=client -o yaml | kubectl apply -f - || echo "Secret creation failed, continuing..."
                 """

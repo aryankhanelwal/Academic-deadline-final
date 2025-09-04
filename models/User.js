@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   password: String,
   phone: { type: String, unique: true, sparse: true }, // Make phone unique and sparse (allows null values)
   
-  // OTP Authentication fields
+  // SMS OTP Authentication fields (deprecated - keeping for backward compatibility)
   otp: {
     code: { type: String }, // Current OTP code
     expiresAt: { type: Date }, // OTP expiration time
@@ -17,8 +17,18 @@ const userSchema = new mongoose.Schema({
     lastSentAt: { type: Date } // When OTP was last sent (for rate limiting)
   },
   
-  // Phone verification status
+  // Email OTP Authentication fields
+  emailOtp: {
+    code: { type: String }, // Current email OTP code
+    expiresAt: { type: Date }, // OTP expiration time
+    attempts: { type: Number, default: 0 }, // Failed verification attempts
+    verified: { type: Boolean, default: false }, // Whether email is verified
+    lastSentAt: { type: Date } // When OTP was last sent (for rate limiting)
+  },
+  
+  // Verification status
   phoneVerified: { type: Boolean, default: false },
+  emailVerified: { type: Boolean, default: false },
   
   // Email reminder preferences
   emailReminders: {

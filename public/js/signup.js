@@ -118,10 +118,7 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
   }
 
   // Validate phone number using intl-tel-input
-  if (!phoneInput.isValidNumber()) {
-    showMessage("Invalid phone number.", "error");
-    return;
-  }
+  // Phone number is no longer required for email OTP flow
 
   // Gather user data from form fields
   const user = {
@@ -129,7 +126,7 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
     StudentId: document.getElementById("StudentId").value,
     CollegeName: document.getElementById("CollegeName").value,
     email,
-    phone: phoneInput.getNumber(),
+    phone: '',
     password: password.value
   };
 
@@ -147,6 +144,7 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies for session management
       body: JSON.stringify(user)
     });
 
@@ -185,9 +183,10 @@ function showOTPVerificationScreen(responseData) {
   // Show OTP verification form
   document.getElementById('otp-verification-form').style.display = 'block';
   
-  // Update the phone number display
-  document.getElementById('otp-phone').textContent = responseData.phone;
-  document.getElementById('otp-phone-number').value = responseData.phone;
+  // Reuse the existing UI fields to display email instead of phone
+  const emailToShow = responseData.email || document.getElementById("email").value;
+  document.getElementById('otp-phone').textContent = emailToShow; // label may still say phone in HTML
+  document.getElementById('otp-phone-number').value = emailToShow; // store email in this hidden/input field
   
   // Update message
   document.getElementById('otp-message').textContent = responseData.message;
@@ -195,7 +194,7 @@ function showOTPVerificationScreen(responseData) {
   // Focus on OTP input
   document.getElementById('otp-code').focus();
   
-  showMessage("OTP sent to your phone number. Please check your messages.", "success");
+  showMessage("OTP sent to your email. Please check your inbox.", "success");
 }
 
 // OTP form submission
@@ -203,7 +202,7 @@ document.getElementById("otp-form").addEventListener("submit", async e => {
   e.preventDefault();
   
   const otpCode = document.getElementById('otp-code').value.trim();
-  const phoneNumber = document.getElementById('otp-phone-number').value;
+  const emailAddress = document.getElementById('otp-phone-number').value; // reused field now holds email
   
   if (!otpCode || otpCode.length !== 6) {
     showMessage("Please enter a valid 6-digit OTP code.", "error");
@@ -220,9 +219,10 @@ document.getElementById("otp-form").addEventListener("submit", async e => {
     const res = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies for session management
       body: JSON.stringify({
         otp: otpCode,
-        phone: phoneNumber
+        email: emailAddress
       })
     });
     
@@ -263,13 +263,14 @@ document.getElementById("resend-otp-btn").addEventListener("click", async () => 
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies for session management
       body: JSON.stringify(pendingRegistrationData)
     });
     
     const data = await res.json();
     
     if (res.ok) {
-      showMessage("OTP resent successfully. Please check your phone.", "success");
+      showMessage("OTP resent successfully. Please check your email.", "success");
       // Clear previous OTP input
       document.getElementById('otp-code').value = '';
       document.getElementById('otp-code').focus();

@@ -20,7 +20,114 @@ const nodemailer = require("nodemailer");   // Email sending (if needed)
 const User = require("../models/User");      // User database model (MongoDB/Mongoose)
 const Task = require('../models/Task');      // Task database model
 const Blog = require('../models/Blog');      // Blog database model
-const otpService = require('../services/otpService'); // OTP service for SMS authentication
+const emailOtpService = require('../services/emailOtpService'); // Email OTP service
+
+// Custom email OTP sending function
+async function sendCustomOTPEmail(email, otpCode, expiresAt) {
+  try {
+    // Check if transporter is available from emailOtpService
+    if (!emailOtpService.transporter) {
+      console.log(`🔐 EMAIL OTP for ${email}: ${otpCode} (expires at ${expiresAt})`);
+      return {
+        success: true,
+        message: `Email delivery failed, using simulation mode. Your OTP code is: ${otpCode}`,
+        expiresAt: expiresAt,
+        simulationMode: true
+      };
+    }
+
+    // Send email via Nodemailer with our specific OTP
+    const mailOptions = {
+      from: {
+        name: 'Academic Deadline Tracker',
+        address: process.env.EMAIL_USER
+      },
+      to: email,
+      subject: 'Your Verification Code - Academic Deadline Tracker',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;">
+            <h1 style="color: #2563eb; margin-bottom: 20px;">Academic Deadline Tracker</h1>
+            <h2 style="color: #374151; margin-bottom: 20px;">Verify Your Email</h2>
+            
+            <div style="background-color: #ffffff; padding: 25px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+              <h1 style="color: #2563eb; font-size: 36px; margin: 0; font-weight: bold; letter-spacing: 5px;">
+                ${otpCode}
+              </h1>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 16px; margin: 20px 0;">
+              Enter this verification code to complete your registration.
+            </p>
+            
+            <p style="color: #ef4444; font-size: 14px; margin: 20px 0;">
+              ⚠️ This code will expire in 10 minutes.
+            </p>
+            
+            <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+              If you didn't request this verification code, please ignore this email.<br>
+              Do not share this code with anyone.
+            </p>
+          </div>
+        </div>
+      `,
+      text: `
+        Academic Deadline Tracker - Email Verification
+        
+        Your verification code is: ${otpCode}
+        
+        Enter this code to complete your registration.
+        This code will expire in 10 minutes.
+        
+        If you didn't request this verification code, please ignore this email.
+        Do not share this code with anyone.
+      `
+    };
+
+    // Create transporter if needed
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+      port: process.env.EMAIL_PORT || 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log(`📧 OTP sent to ${email}. Message ID: ${info.messageId}`);
+    
+    return {
+      success: true,
+      message: 'OTP sent to your email address successfully',
+      expiresAt: expiresAt,
+      messageId: info.messageId
+    };
+
+  } catch (error) {
+    console.error('❌ Failed to send email OTP:', error.message);
+    console.warn('🔄 Falling back to simulation mode due to email error');
+    
+    // Fall back to simulation mode when email fails
+    console.log(`🔐 EMAIL OTP for ${email}: ${otpCode} (expires at ${expiresAt})`);
+    
+    return {
+      success: true,
+      message: `Email delivery failed, using simulation mode. Your OTP code is: ${otpCode}`,
+      expiresAt: expiresAt,
+      simulationMode: true,
+      emailError: {
+        code: error.code,
+        message: error.message
+      }
+    };
+  }
+}
 /**
  * HOME ROUTE
  * Purpose: Serves the main landing page when users visit the root URL
@@ -57,8 +164,8 @@ router.get("/html/navbarAfterLogin.html", (req, res) => {
 });
 
 /**
- * USER REGISTRATION ENDPOINT WITH OTP
- * Purpose: Creates a new user account with phone number verification
+ * USER REGISTRATION ENDPOINT WITH EMAIL OTP
+ * Purpose: Creates a new user account with email verification
  * Method: POST
  * Access: Public (no authentication required)
  * 
@@ -66,37 +173,46 @@ router.get("/html/navbarAfterLogin.html", (req, res) => {
  * 1. Extract user data from request body
  * 2. Validate required fields and check duplicates  
  * 3. Store user data temporarily in session
- * 4. Send OTP to phone number
+ * 4. Send OTP to email address
  * 5. User must verify OTP to complete registration
  * 6. NO USER IS SAVED TO DATABASE UNTIL OTP IS VERIFIED
  */
 router.post("/api/signup", async (req, res) => {
   try {
+    console.log('📝 Signup request received:', {
+      hasName: !!req.body.name,
+      hasEmail: !!req.body.email,
+      hasPassword: !!req.body.password,
+      userAgent: req.get('User-Agent'),
+      ip: req.ip
+    });
+    
     const { name, StudentId, CollegeName, email, password, phone } = req.body;
 
-    // Validate required fields
-    if (!name || !phone) {
+    // Validate required fields (email is now required instead of phone)
+    if (!name || !email || !password) {
+      console.warn('❌ Signup validation failed - missing required fields:', {
+        hasName: !!name,
+        hasEmail: !!email,
+        hasPassword: !!password
+      });
       return res.status(400).json({ 
-        message: "Name and phone number are required" 
+        message: "Name, email, and password are required" 
       });
     }
 
-    // Check if user already exists with this email or phone
-    const formattedPhone = otpService.formatPhoneNumber(phone);
-    
-    if (email) {
-      const existingEmail = await User.findOne({ email });
-      if (existingEmail) {
-        return res.status(400).json({ 
-          message: "User with this email already exists" 
-        });
-      }
+    // Validate email format
+    if (!emailOtpService.isValidEmail(email)) {
+      return res.status(400).json({ 
+        message: "Invalid email address format" 
+      });
     }
 
-    const existingPhone = await User.findOne({ phone: formattedPhone });
-    if (existingPhone) {
+    // Check if user already exists with this email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return res.status(400).json({ 
-        message: "User with this phone number already exists" 
+        message: "User with this email already exists" 
       });
     }
 
@@ -105,80 +221,64 @@ router.post("/api/signup", async (req, res) => {
       name,
       StudentId: StudentId || '',
       CollegeName: CollegeName || '',
-      email: email || null,
-      password: password || null,
-      phone: formattedPhone,
+      email: email,
+      password: password,
+      phone: phone || null,
       timestamp: Date.now()
     };
 
-    // Generate and store OTP in session
-    const otpCode = otpService.generateOTP();
+    // Generate OTP first, then send it
+    const otpCode = emailOtpService.generateOTP();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     
-    req.session.otpData = {
+    // Store OTP in session for verification
+    req.session.emailOtpData = {
       code: otpCode,
-      phone: formattedPhone,
+      email: email,
       expiresAt: expiresAt,
       attempts: 0,
       lastSentAt: new Date()
     };
-
-    // Try to send OTP via Twilio first, fall back to simulation mode if it fails
-    if (!otpService.client) {
-      console.log(`🔐 OTP for ${formattedPhone}: ${otpCode} (expires at ${expiresAt})`);
-      
-      // Return response that tells frontend to show OTP screen
-      return res.status(200).json({ 
-        message: `OTP sent successfully (simulation mode). Code: ${otpCode}`,
-        requireOTP: true,
-        phone: formattedPhone,
-        simulationMode: true
-      });
-    }
-
-    // In production, send real SMS via Twilio
-    try {
-      const message = await otpService.client.messages.create({
-        body: `Your Midvey verification code is: ${otpCode}. This code will expire in 10 minutes. Do not share this code with anyone.`,
-        from: otpService.fromNumber,
-        to: formattedPhone
-      });
-      
-      console.log(`📱 OTP sent to ${formattedPhone}. Message SID: ${message.sid}`);
+    
+    console.log(`💾 Session Debug - OTP stored:`, {
+      sessionID: req.sessionID,
+      otpCode: otpCode,
+      email: email,
+      expiresAt: expiresAt
+    });
+    
+    // Create a custom email sending with our specific OTP code
+    const result = await sendCustomOTPEmail(email, otpCode, expiresAt);
+    
+    if (result.success) {
+      console.log(`✅ OTP sent to email: ${email}`);
       
       res.status(200).json({ 
-        message: "OTP sent to your phone number. Please verify to complete registration.",
+        message: result.message,
         requireOTP: true,
-        phone: formattedPhone
+        email: email,
+        expiresAt: result.expiresAt,
+        simulationMode: result.simulationMode || false
       });
-    } catch (error) {
-      console.error('❌ Failed to send OTP via Twilio:', error.message);
-      console.error('❌ Twilio Error Details:', {
-        code: error.code,
-        moreInfo: error.moreInfo,
-        status: error.status,
-        details: error.details
-      });
+    } else {
+      console.error('❌ Failed to send email OTP:', result.message);
       
-      // Fall back to simulation mode when Twilio fails
-      console.warn('🔄 Falling back to simulation mode due to Twilio error');
-      console.log(`🔐 OTP for ${formattedPhone}: ${otpCode} (expires at ${expiresAt})`);
+      // Clear session data on failure
+      delete req.session.pendingRegistration;
+      delete req.session.emailOtpData;
       
-      // Still allow registration to proceed in simulation mode
-      res.status(200).json({ 
-        message: `OTP sending failed, using simulation mode. Code: ${otpCode}`,
-        requireOTP: true,
-        phone: formattedPhone,
-        simulationMode: true,
-        twilioError: {
-          code: error.code,
-          message: error.message
-        }
+      res.status(400).json({ 
+        message: result.message || "Failed to send verification email. Please try again."
       });
     }
 
   } catch (err) {
     console.error('Registration error:', err);
+    
+    // Clear session data on error
+    delete req.session.pendingRegistration;
+    delete req.session.emailOtpData;
+    
     res.status(500).json({ 
       message: "Registration failed. Please try again." 
     });
@@ -186,43 +286,52 @@ router.post("/api/signup", async (req, res) => {
 });
 
 /**
- * VERIFY OTP FOR REGISTRATION ENDPOINT
- * Purpose: Verify OTP and complete user registration
+ * VERIFY EMAIL OTP FOR REGISTRATION ENDPOINT
+ * Purpose: Verify email OTP and complete user registration
  * Method: POST
  * Access: Public (no authentication required)
  * 
  * WORKFLOW:
  * 1. Check if pending registration exists in session
  * 2. Verify the OTP code against session data
- * 3. If valid, create user in database with phone verified
+ * 3. If valid, create user in database with email verified
  * 4. Log user in and clear session data
  * 5. Return success message
  */
 router.post("/api/verify-otp", async (req, res) => {
   try {
-    const { otp, phone } = req.body;
+    console.log('📧 OTP verification request received:', {
+      hasOtp: !!req.body.otp,
+      hasEmail: !!req.body.email,
+      sessionHasPendingReg: !!req.session.pendingRegistration,
+      sessionHasOtpData: !!req.session.emailOtpData,
+      sessionID: req.sessionID,
+      providedOtp: req.body.otp,
+      providedEmail: req.body.email
+    });
+    
+    const { otp, email } = req.body;
 
-    if (!otp || !phone) {
+    if (!otp || !email) {
       return res.status(400).json({ 
-        message: "OTP and phone number are required" 
+        message: "OTP and email address are required" 
       });
     }
 
     // Check if there's a pending registration
-    if (!req.session.pendingRegistration || !req.session.otpData) {
+    if (!req.session.pendingRegistration || !req.session.emailOtpData) {
       return res.status(400).json({ 
         message: "No pending registration found. Please start registration again." 
       });
     }
 
-    const formattedPhone = otpService.formatPhoneNumber(phone);
     const pendingReg = req.session.pendingRegistration;
-    const otpData = req.session.otpData;
+    const otpData = req.session.emailOtpData;
 
-    // Verify phone number matches
-    if (pendingReg.phone !== formattedPhone || otpData.phone !== formattedPhone) {
+    // Verify email matches
+    if (pendingReg.email !== email || otpData.email !== email) {
       return res.status(400).json({ 
-        message: "Phone number mismatch" 
+        message: "Email address mismatch" 
       });
     }
 
@@ -230,7 +339,7 @@ router.post("/api/verify-otp", async (req, res) => {
     if (new Date() > new Date(otpData.expiresAt)) {
       // Clear expired session data
       delete req.session.pendingRegistration;
-      delete req.session.otpData;
+      delete req.session.emailOtpData;
       return res.status(400).json({ 
         message: "OTP has expired. Please register again." 
       });
@@ -240,18 +349,27 @@ router.post("/api/verify-otp", async (req, res) => {
     if (otpData.attempts >= 5) {
       // Clear session data after max attempts
       delete req.session.pendingRegistration;
-      delete req.session.otpData;
+      delete req.session.emailOtpData;
       return res.status(400).json({ 
         message: "Too many OTP attempts. Please register again." 
       });
     }
 
     // Increment attempts
-    req.session.otpData.attempts = (otpData.attempts || 0) + 1;
+    req.session.emailOtpData.attempts = (otpData.attempts || 0) + 1;
 
     // Verify OTP code
+    console.log(`🔍 OTP Verification Debug:`, {
+      storedOTP: otpData.code,
+      providedOTP: otp,
+      storedOTPType: typeof otpData.code,
+      providedOTPType: typeof otp,
+      match: otpData.code === otp.toString()
+    });
+    
     if (otpData.code !== otp.toString()) {
-      const remainingAttempts = 5 - req.session.otpData.attempts;
+      const remainingAttempts = 5 - req.session.emailOtpData.attempts;
+      console.warn(`❌ OTP mismatch: stored=${otpData.code}, provided=${otp}`);
       return res.status(400).json({ 
         message: `Invalid OTP. ${remainingAttempts} attempts remaining.` 
       });
@@ -265,7 +383,7 @@ router.post("/api/verify-otp", async (req, res) => {
       email: pendingReg.email,
       password: pendingReg.password,
       phone: pendingReg.phone,
-      phoneVerified: true // Mark phone as verified
+      emailVerified: true // Mark email as verified
     });
 
     await newUser.save();
@@ -275,22 +393,27 @@ router.post("/api/verify-otp", async (req, res) => {
     
     // Clear registration and OTP data from session
     delete req.session.pendingRegistration;
-    delete req.session.otpData;
+    delete req.session.emailOtpData;
     
-    console.log(`Registration completed for: ${newUser.name} (${newUser.phone})`);
+    console.log(`✅ Registration completed for: ${newUser.name} (${newUser.email})`);
     
     res.status(200).json({ 
       message: "Registration successful! You are now logged in.",
-      name: newUser.name
+      name: newUser.name,
+      email: newUser.email
     });
 
   } catch (err) {
-    console.error('OTP verification error:', err);
+    console.error('❌ OTP verification error:', err);
+    
+    // Clear session data on error
+    delete req.session.pendingRegistration;
+    delete req.session.emailOtpData;
     
     // Handle duplicate key error
     if (err.code === 11000) {
       return res.status(400).json({ 
-        message: "User with this email or phone already exists" 
+        message: "User with this email already exists" 
       });
     }
     
@@ -689,13 +812,13 @@ router.post("/api/auth/resend-otp", async (req, res) => {
 });
 
 /**
- * GET OTP SERVICE STATUS ENDPOINT
- * Purpose: Check OTP service configuration and status
+ * GET EMAIL OTP SERVICE STATUS ENDPOINT
+ * Purpose: Check email OTP service configuration and status
  * Method: GET
  * Access: Public (for debugging/monitoring)
  */
-router.get("/api/auth/otp-status", (req, res) => {
-  const status = otpService.getStatus();
+router.get("/api/auth/email-otp-status", (req, res) => {
+  const status = emailOtpService.getStatus();
   res.json(status);
 });
 
