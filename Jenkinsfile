@@ -35,7 +35,7 @@ pipeline {
     }
 
     environment {
-        REPO_URL = 'https://github.com/aryankhanelwal/Academic_Deadline.git'
+        REPO_URL = 'https://github.com/aryankhanelwal/Academic-deadline-final.git'
         BRANCH = 'master'
         DOCKER_HUB_REPO = 'aryankhandelwallll/academic-deadline'
         AWS_REGION = 'ap-south-1'
