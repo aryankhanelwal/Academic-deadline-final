@@ -61,6 +61,11 @@ class OTPService {
    * @returns {string} Formatted phone number
    */
   formatPhoneNumber(phoneNumber) {
+    // If already in international format, return as is
+    if (phoneNumber.startsWith('+')) {
+      return phoneNumber;
+    }
+    
     // Remove all non-digits
     let cleaned = phoneNumber.replace(/\D/g, '');
     
@@ -69,7 +74,7 @@ class OTPService {
       cleaned = '91' + cleaned.substring(1);
     }
     
-    // If it doesn't start with country code, add India's code
+    // If it doesn't start with country code, add India's code (for 10-digit numbers)
     if (!cleaned.startsWith('91') && cleaned.length === 10) {
       cleaned = '91' + cleaned;
     }

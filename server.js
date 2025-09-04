@@ -48,6 +48,17 @@ app.use(cors({
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const healthCheck = {
+    uptime: process.uptime(),
+    message: 'OK',
+    timestamp: Date.now(),
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  };
+  res.status(200).json(healthCheck);
+});
+
 // Routes
 app.use("/", routes);
 app.use("/tasks", taskRoutes);
@@ -56,6 +67,6 @@ app.use("/tasks", taskRoutes);
 app.use(express.static(path.join(__dirname, "public")));
 
 // Start server
-app.listen(PORT,'0.0.0.0' ,() => {
-  console.log(`🚀 Server running at http://13.232.189.221:${PORT}`);
+app.listen(PORT ,() => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

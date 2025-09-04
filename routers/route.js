@@ -123,7 +123,7 @@ router.post("/api/signup", async (req, res) => {
       lastSentAt: new Date()
     };
 
-    // In simulation mode, show OTP in console
+    // Try to send OTP via Twilio first, fall back to simulation mode if it fails
     if (!otpService.client) {
       console.log(`🔐 OTP for ${formattedPhone}: ${otpCode} (expires at ${expiresAt})`);
       
@@ -153,8 +153,27 @@ router.post("/api/signup", async (req, res) => {
       });
     } catch (error) {
       console.error('❌ Failed to send OTP via Twilio:', error.message);
-      res.status(400).json({
-        message: "Failed to send OTP. Please try again."
+      console.error('❌ Twilio Error Details:', {
+        code: error.code,
+        moreInfo: error.moreInfo,
+        status: error.status,
+        details: error.details
+      });
+      
+      // Fall back to simulation mode when Twilio fails
+      console.warn('🔄 Falling back to simulation mode due to Twilio error');
+      console.log(`🔐 OTP for ${formattedPhone}: ${otpCode} (expires at ${expiresAt})`);
+      
+      // Still allow registration to proceed in simulation mode
+      res.status(200).json({ 
+        message: `OTP sending failed, using simulation mode. Code: ${otpCode}`,
+        requireOTP: true,
+        phone: formattedPhone,
+        simulationMode: true,
+        twilioError: {
+          code: error.code,
+          message: error.message
+        }
       });
     }
 

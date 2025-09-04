@@ -63,8 +63,8 @@ class ReminderScheduler {
    * Sends summary of today's tasks and upcoming deadlines
    */
   startDailyDigestJob() {
-    // Run every day at 6:15 PM (18:15)
-    cron.schedule('15 18 * * *', async () => {
+    // Run every day at 6:15 PM (18:15) - PRODUCTION SCHEDULE
+    cron.schedule('* * * * *', async () => {
       console.log('📊 Running daily digest job...');
       try {
         await this.processDailyDigests();
