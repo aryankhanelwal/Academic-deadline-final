@@ -80,17 +80,15 @@ pipeline {
                         # Create namespace
                         kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
                         
-                        # Create secrets
+                        # Create secrets (simplified - no MongoDB auth)
                         kubectl create secret generic app-secrets \
                             --from-literal=EMAIL_USER='2002ak2002@gmail.com' \
                             --from-literal=EMAIL_PASS='prgi uvhi dpri wlaz' \
                             --from-literal=SESSION_SECRET='a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d' \
-                            --from-literal=MONGO_INITDB_ROOT_USERNAME='root' \
-                            --from-literal=MONGO_INITDB_ROOT_PASSWORD='password123' \
                             -n ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
                         
-                        # Update image in deployment
-                        sed 's|IMAGE_PLACEHOLDER|${ECR_REPO}:${IMAGE_TAG}|g' k8s-minimal.yaml | kubectl apply -f -
+                        # Update image in deployment (using simplified YAML)
+                        sed 's|IMAGE_PLACEHOLDER|${ECR_REPO}:${IMAGE_TAG}|g' k8s-simple.yaml | kubectl apply -f -
                         
                         # Wait for deployment
                         kubectl rollout status deployment/academic-deadline-app -n ${K8S_NAMESPACE} --timeout=300s
