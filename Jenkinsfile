@@ -122,7 +122,7 @@ SESSION_SECRET=a3b2f8d23c84c5eaf8dca92b21a1c9d739e24c88b9db19e88b0d4f5e7e1c6f9d
 EOF
                     
                     # Update docker-compose to use new image
-                    sed -i 's/build: ./image: ${ECR_REPO}:${IMAGE_TAG}/g' docker-compose.yml
+                    sed -i 's|build: .|image: ${ECR_REPO}:${IMAGE_TAG}|g' docker-compose.yml
                     
                     # Deploy
                     docker compose down || true
