@@ -68,7 +68,9 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-            when { params.DEPLOYMENT_TYPE == 'kubernetes' }
+            when {
+                expression { params.DEPLOYMENT_TYPE == 'kubernetes' }
+            }
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Credentials']]) {
                     sh """
@@ -102,7 +104,9 @@ pipeline {
         }
 
         stage('Deploy with Docker Compose') {
-            when { params.DEPLOYMENT_TYPE == 'docker-compose' }
+            when {
+                expression { params.DEPLOYMENT_TYPE == 'docker-compose' }
+            }
             steps {
                 sh """
                     # Create .env file
