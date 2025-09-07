@@ -75,7 +75,7 @@ spec:
     spec:
       containers:
         - name: academic-deadline-app
-          image: IMAGE_PLACEHOLDER
+          image: aryankhandelwallll/academic-deadline:latest
           ports:
             - containerPort: 3000
           env:
@@ -84,7 +84,7 @@ spec:
             - name: PORT
               value: "3000"
             - name: MONGO_URI
-              value: "mongodb://mongodb:27017/test"
+              value: "mongodb://root:password123@mongodb:27017/test"
             - name: EMAIL_HOST
               value: "smtp.gmail.com"
             - name: EMAIL_PORT
