@@ -23,7 +23,7 @@ pipeline {
         AWS_ACCOUNT_ID = '698031349056'
         AWS_REGION = 'ap-south-1'
         ECR_REPO = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/academic-deadline"
-        EKS_CLUSTER = 'academic-deadline-cluster'
+        EKS_CLUSTER = 'aryan-capsule-cluster'
         K8S_NAMESPACE = 'academic-deadline'
     }
 
