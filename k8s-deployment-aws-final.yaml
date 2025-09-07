@@ -158,7 +158,7 @@ spec:
       containers:
         - name: academic-deadline-app
           # Replace YOUR_ACCOUNT_ID with your actual AWS Account ID
-          image: YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/academic-deadline-app:latest
+          image: YOUR_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/academic-deadline-app:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

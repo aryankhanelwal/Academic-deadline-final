@@ -25,7 +25,7 @@ pipeline {
         choice(name: 'DEPLOYMENT_TYPE', choices: ['kubernetes', 'docker-compose', 'both'], description: 'Choose deployment method')
         string(name: 'K8S_NAMESPACE', defaultValue: 'academic-deadline', description: 'Kubernetes namespace')
         string(name: 'EKS_CLUSTER_NAME', defaultValue: 'academic-deadline-cluster', description: 'EKS cluster name')
-        choice(name: 'AWS_REGION', choices: ['us-east-1', 'us-west-2', 'ap-south-1', 'eu-west-1'], description: 'AWS Region')
+        choice(name: 'AWS_REGION', choices: ['ap-south-1', 'us-east-1', 'us-west-2', 'eu-west-1'], description: 'AWS Region')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip test execution')
         booleanParam(name: 'FORCE_REBUILD', defaultValue: false, description: 'Force rebuild even if image exists')
     }
