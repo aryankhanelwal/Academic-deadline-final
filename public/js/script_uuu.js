@@ -19,7 +19,7 @@ function getCategoryInfo(category) {
 }
 
 async function fetchTasks() {
-  const response = await fetch("http://localhost:3000/tasks", {
+  const response = await fetch("http://3.110.25.231:3000/tasks", {
     credentials: 'include'
   });
   allTasks = await response.json(); // Store tasks globally
@@ -120,7 +120,7 @@ async function submitTaskForm(e) {
   };
   
   const method = editingTaskId ? "PUT" : "POST";
-  const url = editingTaskId ? `http://localhost:3000/tasks/${editingTaskId}` : "http://localhost:3000/tasks/add";
+  const url = editingTaskId ? `http://3.110.25.231:3000/tasks/${editingTaskId}` : "http://3.110.25.231:3000/tasks/add";
 
   await fetch(url, {
     method: method,
@@ -148,7 +148,7 @@ async function submitTaskForm(e) {
 }
 
 async function editTask(id) {
-  const response = await fetch(`http://localhost:3000/tasks/${id}`, {
+  const response = await fetch(`http://3.110.25.231:3000/tasks/${id}`, {
     credentials: 'include'
   });
   const task = await response.json();
@@ -156,7 +156,7 @@ async function editTask(id) {
 }
 
 async function markComplete(id) {
-  await fetch(`http://localhost:3000/tasks/${id}`, {
+  await fetch(`http://3.110.25.231:3000/tasks/${id}`, {
     method: 'DELETE',
     credentials: 'include'
   });
@@ -164,7 +164,7 @@ async function markComplete(id) {
 }
 
 async function deleteTask(id) {
-  await fetch(`http://localhost:3000/tasks/${id}`, {
+  await fetch(`http://3.110.25.231:3000/tasks/${id}`, {
     method: "DELETE",
     credentials: 'include'
   });
