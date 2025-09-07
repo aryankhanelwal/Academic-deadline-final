@@ -1,0 +1,137 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: academic-deadline
+---
+# MongoDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: academic-deadline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:6.0-jammy
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MONGO_INITDB_ROOT_PASSWORD
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+      volumes:
+        - name: mongo-data
+          emptyDir: {}
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: academic-deadline
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+---
+# App Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: academic-deadline-app
+  namespace: academic-deadline
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: academic-deadline-app
+  template:
+    metadata:
+      labels:
+        app: academic-deadline-app
+    spec:
+      containers:
+        - name: academic-deadline-app
+          image: IMAGE_PLACEHOLDER
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: MONGO_URI
+              value: "mongodb://mongodb:27017/test"
+            - name: EMAIL_HOST
+              value: "smtp.gmail.com"
+            - name: EMAIL_PORT
+              value: "587"
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: EMAIL_USER
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: EMAIL_PASS
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SESSION_SECRET
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+# App Service with LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: academic-deadline-service
+  namespace: academic-deadline
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  type: LoadBalancer
+  selector:
+    app: academic-deadline-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
