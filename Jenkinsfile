@@ -90,7 +90,7 @@ pipeline {
                             -n ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
                         
                         # Update image in deployment
-                        sed 's/IMAGE_PLACEHOLDER/${ECR_REPO}:${IMAGE_TAG}/g' k8s-minimal.yaml | kubectl apply -f -
+                        sed 's|IMAGE_PLACEHOLDER|${ECR_REPO}:${IMAGE_TAG}|g' k8s-minimal.yaml | kubectl apply -f -
                         
                         # Wait for deployment
                         kubectl rollout status deployment/academic-deadline-app -n ${K8S_NAMESPACE} --timeout=300s
