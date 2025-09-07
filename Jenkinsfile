@@ -125,8 +125,8 @@ EOF
                     sed -i 's|build: .|image: ${ECR_REPO}:${IMAGE_TAG}|g' docker-compose.yml
                     
                     # Deploy
-                    docker compose down || true
-                    docker compose up -d
+                    docker-compose down || true
+                    docker-compose up -d
                     
                     echo "✅ Application deployed at http://localhost:3000"
                 """
