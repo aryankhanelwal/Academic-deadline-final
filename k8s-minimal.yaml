@@ -75,7 +75,7 @@ spec:
     spec:
       containers:
         - name: academic-deadline-app
-          image: aryankhandelwallll/academic-deadline:latest
+          image: aryankhandelwallll/academic-deadline:1.0.0
           ports:
             - containerPort: 3000
           env:
