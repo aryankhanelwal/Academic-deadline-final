@@ -2,6 +2,8 @@
 const taskForm = document.getElementById("taskForm");
 let editingTaskId = null; // Track which task is being edited
 let allTasks = []; // Global storage for all tasks to enable filtering
+const API_BASE = "http://ad690efa725c8439b8e8c0044b11df4e-5fff857d3fe770c8.elb.ap-south-1.amazonaws.com";
+
 
 function generateTaskId() {
   return 'TASK-' + Date.now().toString().slice(-6); // e.g., TASK-123456
@@ -19,7 +21,7 @@ function getCategoryInfo(category) {
 }
 
 async function fetchTasks() {
-  const response = await fetch("http://3.110.25.231:3000/tasks", {
+  const response = await fetch(`${API_BASE}/tasks`, {
     credentials: 'include'
   });
   allTasks = await response.json(); // Store tasks globally
@@ -120,7 +122,7 @@ async function submitTaskForm(e) {
   };
   
   const method = editingTaskId ? "PUT" : "POST";
-  const url = editingTaskId ? `http://3.110.25.231:3000/tasks/${editingTaskId}` : "http://3.110.25.231:3000/tasks/add";
+  const url = editingTaskId ? `${API_BASE}/tasks/${editingTaskId}` : `${API_BASE}/tasks/add`;
 
   await fetch(url, {
     method: method,
@@ -148,7 +150,7 @@ async function submitTaskForm(e) {
 }
 
 async function editTask(id) {
-  const response = await fetch(`http://3.110.25.231:3000/tasks/${id}`, {
+  const response = await fetch(`${API_BASE}/tasks/${id}`, {
     credentials: 'include'
   });
   const task = await response.json();
@@ -156,7 +158,7 @@ async function editTask(id) {
 }
 
 async function markComplete(id) {
-  await fetch(`http://3.110.25.231:3000/tasks/${id}`, {
+  await fetch(`${API_BASE}/tasks/${id}`, {
     method: 'DELETE',
     credentials: 'include'
   });
@@ -164,7 +166,7 @@ async function markComplete(id) {
 }
 
 async function deleteTask(id) {
-  await fetch(`http://3.110.25.231:3000/tasks/${id}`, {
+  await fetch(`${API_BASE}/tasks/${id}`, {
     method: "DELETE",
     credentials: 'include'
   });
