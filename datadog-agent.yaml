@@ -1,0 +1,28 @@
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+  namespace: datadog
+spec:
+  global:
+    clusterName: aryan-capsule-cluster
+    site: us5.datadoghq.com
+    credentials:
+      apiSecret:
+        secretName: datadog-secret
+        keyName: api-key
+
+  features:
+    kubeStateMetricsCore:
+      enabled: true
+    apm:
+      enabled: true
+      instrumentation:
+        enabled: true
+        targets:
+          - name: "default-target"
+    logCollection:
+      enabled: true
+      containerCollectAll: true
+    orchestratorExplorer:
+      enabled: true
