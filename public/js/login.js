@@ -57,8 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show success message
         alert("Login successful! Redirecting...");
         
-        // Redirect to home page
-        window.location.href = "home.html";
+        // Small delay to ensure state is properly updated
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 100);
       } else {
         alert(data.message || "Login failed.");
       }

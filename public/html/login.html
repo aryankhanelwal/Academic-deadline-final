@@ -209,32 +209,25 @@
   </div>
 
   <script>
+    // Password toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const togglePassword = document.getElementById("togglePassword");
+      const passwordField = document.getElementById("login-password");
 
-    fetch('navbar.html')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('navbar-placeholder').innerHTML = data;
-      })
-      .catch(error => {
-        console.error('Error loading navbar:', error);
-      });
-      
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordField = document.getElementById("login-password");
+      if (togglePassword && passwordField) {
+        togglePassword.addEventListener("click", () => {
+          const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+          passwordField.setAttribute("type", type);
+          togglePassword.classList.toggle("fa-eye-slash");
+        });
+      }
 
-    togglePassword.addEventListener("click", () => {
-      const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
-      passwordField.setAttribute("type", type);
-      togglePassword.classList.toggle("fa-eye-slash");
+      // Debug: Check if login.js is loaded
+      console.log('Login page scripts loaded');
+      console.log('Form element:', document.getElementById('login-form'));
+      console.log('Email element:', document.getElementById('login-email'));
+      console.log('Password element:', document.getElementById('login-password'));
     });
-
-    // Debug: Check if login.js is loaded
-    console.log('Login page scripts loaded');
-    console.log('Form element:', document.getElementById('login-form'));
-    console.log('Email element:', document.getElementById('login-email'));
-    console.log('Password element:', document.getElementById('login-password'));
-
-    
   </script>
   <script src="../js/login.js"></script>
   <script src="../js/navbarLoader.js"></script>
